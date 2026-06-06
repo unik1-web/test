@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Угадай число</title>
+    <style>
+      body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          background-color: #f0f2f5;
+          margin: 0;
+          padding: 20px;
+          box-sizing: border-box;
+      }
+      .game-container {
+          background-color: #ffffff;
+          padding: 40px;
+          border-radius: 12px;
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+          text-align: center;
+          max-width: 450px;
+          width: 100%;
+          opacity: 0;
+          transform: translateY(20px);
+          animation: fadeIn 0.8s forwards;
+      }
+      @keyframes fadeIn {
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+      h1 {
+          color: #2c3e50;
+          margin-bottom: 20px;
+          font-size: 2.5em;
+      }
+      p {
+          color: #555;
+          font-size: 1.1em;
+          margin-bottom: 15px;
+      }
+      .input-group {
+          margin-top: 25px;
+          margin-bottom: 25px;
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          align-items: center;
+      }
+      input[type="number"] {
+          width: calc(100% - 40px);
+          padding: 12px 20px;
+          border: 2px solid #ccc;
+          border-radius: 8px;
+          font-size: 1.2em;
+          text-align: center;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          -moz-appearance: textfield; /* Firefox */
+      }
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+      }
+      input[type="number"]:focus {
+          border-color: #4CAF50;
+          box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+          outline: none;
+      }
+      button {
+          background-color: #4CAF50;
+          color: white;
+          padding: 12px 25px;
+          border: none;
+          border-radius: 8px;
+          font-size: 1.2em;
+          cursor: pointer;
+          transition: background-color 0.3s ease, transform 0.2s ease;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      button:hover {
+          background-color: #45a049;
+          transform: translateY(-2px);
+      }
+      button:active {
+          transform: translateY(0);
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .message {
+          margin-top: 20px;
+          font-size: 1.3em;
+          font-weight: bold;
+          color: #333;
+          min-height: 30px;
+      }
+      .attempts {
+          font-size: 1em;
+          color: #777;
+          margin-top: 10px;
+      }
+      .hidden {
+          display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-container">
+      <h1>Угадай число!</h1>
+      <p>Я загадал число от 1 до 100. Попробуй угадать его!</p>
+
+      <div class="input-group">
+        <input
+          type="number"
+          id="guessInput"
+          min="1"
+          max="100"
+          placeholder="Введите число"
+        />
+        <button id="submitGuess">Угадать</button>
+      </div>
+
+      <p id="message" class="message"></p>
+      <p id="attemptsCount" class="attempts"></p>
+      <button id="newGameButton" class="hidden" onclick="initGame()">
+        Начать новую игру
+      </button>
+    </div>
+
+    <script>
+      let randomNumber;
+      let attempts;
+
+      const guessInput = document.getElementById('guessInput');
+      const submitGuessButton = document.getElementById('submitGuess');
+      const messageDisplay = document.getElementById('message');
+      const attemptsCountDisplay = document.getElementById('attemptsCount');
+      const newGameButton = document.getElementById('newGameButton');
+
+      function initGame() {
+          randomNumber = Math.floor(Math.random() * 100) + 1;
+          attempts = 0;
+          messageDisplay.textContent = '';
+          attemptsCountDisplay.textContent = '';
+          guessInput.value = '';
+          guessInput.disabled = false;
+          submitGuessButton.disabled = false;
+          newGameButton.classList.add('hidden');
+          guessInput.focus();
+          console.log('Загаданное число (для отладки):', randomNumber); // Убрать в финальной версии
+      }
+
+      function checkGuess() {
+          const userGuess = parseInt(guessInput.value);
+
+          if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+              messageDisplay.textContent = 'Пожалуйста, введите число от 1 до 100.';
+              return;
+          }
+
+          attempts++;
+          attemptsCountDisplay.textContent = `Попыток: ${attempts}`;
+
+          if (userGuess === randomNumber) {
+              messageDisplay.textContent = `Поздравляю! Вы угадали число ${randomNumber} за ${attempts} попыток!`;
+              messageDisplay.style.color = '#28a745';
+              guessInput.disabled = true;
+              submitGuessButton.disabled = true;
+              newGameButton.classList.remove('hidden');
+          } else if (userGuess < randomNumber) {
+              messageDisplay.textContent = 'Больше!';
+              messageDisplay.style.color = '#ffc107';
+          } else {
+              messageDisplay.textContent = 'Меньше!';
+              messageDisplay.style.color = '#dc3545';
+          }
+          guessInput.value = '';
+          guessInput.focus();
+      }
+
+      submitGuessButton.addEventListener('click', checkGuess);
+      guessInput.addEventListener('keypress', function(event) {
+          if (event.key === 'Enter') {
+              checkGuess();
+          }
+      });
+
+      // Запускаем игру при загрузке страницы
+      initGame();
+    </script>
+  </body>
+</html>
